@@ -1,0 +1,73 @@
+
+package logging
+
+import (
+	"time"
+	"os"
+	"github.com/charmbracelet/log"
+	"github.com/joho/godotenv"
+	"github.com/charmbracelet/lipgloss"
+)
+//Logger ...
+var Logger = SetLogger("")
+// SetLogger ...
+ func SetLogger(prefix string) (*log.Logger) {
+/*	
+	log.DebugLevel
+	log.InfoLevel
+	log.WarnLevel
+	log.ErrorLevel
+	log.FatalLevel
+	
+Use log.SetLevel() to set the log level. 
+You can also create a new logger with a specific log level using log.Options{Level: }.
+*/
+	//  using charmbracelet/log
+	err := godotenv.Load(".env")
+    if err != nil {
+    log.Fatal("Error loading logging .env file")
+    }
+  	logLevel := os.Getenv("LOG_LEVEL")
+	//logLevel := "DEBUG"
+	level, err := log.ParseLevel(logLevel)
+	if err != nil {
+    log.Fatal("Error loading LOG_LEVEL from .env file")
+    }
+	
+	Logger := log.NewWithOptions(os.Stderr, log.Options{
+    ReportCaller: true,
+    ReportTimestamp: true,
+    TimeFormat: time.DateOnly,
+	Formatter: log.TextFormatter,
+	Level: level,
+    Prefix: prefix,
+})
+	
+	//Logger.Debug("Hi, this is your logger " , "Level", logLevel)
+	return Logger
+}
+
+//DefineLogger ...
+func DefineLogger(level log.Level) log.Logger {
+	logger := log.NewWithOptions(os.Stderr, log.Options{
+    ReportCaller: true,
+    ReportTimestamp: true,
+    TimeFormat: time.Kitchen,
+    Prefix: "🪲 ",
+	})
+	styles := log.DefaultStyles()
+	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
+		SetString("DEBUG").
+		Padding(0, 1, 0, 1).
+		Background(lipgloss.Color("204")).
+		Foreground(lipgloss.Color("0"))
+	styles.Levels[log.InfoLevel] = lipgloss.NewStyle().
+		SetString("INFO").
+		Padding(0, 1, 0, 1).
+		Background(lipgloss.Color("301")).
+		Foreground(lipgloss.Color("0"))
+	logger.SetLevel(level)
+	logger.SetReportTimestamp(false)
+	logger.SetStyles(styles)
+	return *logger
+}

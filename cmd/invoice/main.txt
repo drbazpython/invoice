@@ -1,0 +1,57 @@
+package main
+import(
+	"os"
+	//"time"
+	"github.com/charmbracelet/log"
+	"drbaz.com/invoice/cmd/logging"
+	"github.com/joho/godotenv"
+	"drbaz.com/invoice/cmd/myui"
+	"drbaz.com/invoice/cmd/docprocessing"
+	//"github.com/charmbracelet/lipgloss"
+	//"drbaz.com/invoice/cmd/database"
+	//"fmt"
+	)
+
+
+func main(){
+	log := logging.DefineLogger(log.DebugLevel)
+	err := godotenv.Load(".env")
+    if err != nil {
+    	log.Fatal("Error loading .env file")
+    } 
+	
+	hourlyRate := os.Getenv("HOURLY_RATE")	
+	invoice := myui.GetData()
+	invoiceNumber := invoice.InvoiceNumber
+	invoiceHours := invoice.TotalHours
+	invoiceStart := invoice.StartDate
+	invoiceEnd := invoice.EndDate
+
+	log.Debug("Hourly rate","from .env",hourlyRate )
+	log.Debug("GetData","Invoice:  ",invoice)
+
+	wordTemplate := os.Getenv("WORD_TEMPLATE")
+	log.Debug("Word Template from .env", " ", wordTemplate)
+	docTemplate := docprocessing.GetTemplate()
+	log.Debug("docProcessing","GetTemplate", docTemplate)
+	newInvoice := docprocessing.ReplaceDocument(invoiceNumber,invoiceHours,invoiceStart,invoiceEnd, hourlyRate)
+	log.Debug("docProcessing","ReplaceDocument", newInvoice)
+
+	
+
+	
+
+	
+
+	// database testing in database_test.go
+	//db := database.DBInit()
+	//logging.Logger.Debug("database", "name", db.Name())
+	//post := database.DBCreateItem(db)
+	//logging.Logger.Debug(post)
+	// results := database.DBGetAllItems(db)
+	// if err != nil {
+	// 	logging.Logger.Error(err)
+	// }
+	// logging.Logger.Info(results.RowsAffected)
+}
+
